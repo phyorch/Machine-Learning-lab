@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from math import log2
 
 #根据某一dataset来计算香农熵
@@ -49,7 +48,7 @@ def information_gain(init_data_set,set_splited):
 
     return inform_gain
 
-=======
+
 #该函数对当前feature的某一取值进行dataset的划分
 def feature_split()
 
@@ -61,7 +60,7 @@ def Shannon_entropy(features):
 
 
 
->>>>>>> origin/master
+
 
 #该函数找到当前最理想的划分feature，首先对每一个feature进行划分，然后对划分好的feature计算信息增益，最后找到信息增益最大的feature
 def find_best_feature(data_set):
@@ -71,17 +70,17 @@ def find_best_feature(data_set):
 
     max_info_gain = 0
 
-<<<<<<< HEAD
+
     for term in range(feature_num):
         feature_list = [temp[term] for temp in data_set]
         feature_axis = term
         data_set_split = feature_split(data_set,feature_list,feature_axis)
         info_gain = information_gain(data_set,data_set_split)
-=======
+
     for term in range(feature_num)
         feature_list = [temp[term] for temp in data_set]
         info_gain = information_gain(feature_list)
->>>>>>> origin/master
+
         if (info_gain > max_info_gain):
             max_info_gain = info_gain
             max_feature_index = term
@@ -89,7 +88,6 @@ def find_best_feature(data_set):
     return max_feature_index
 
 
-<<<<<<< HEAD
 def class_vote(class_list):
     classCount = {}
     for vote in classList:
@@ -98,12 +96,11 @@ def class_vote(class_list):
     sortedClassCount = sorted(classCount.iteritems(), key=operator.itemgetter(1), reverse=True)
     return sortedClassCount[0][0]
 
-=======
 
 class_vote(class_list)
 
 information_gain(features)
->>>>>>> origin/master
+
 
 def Tree_creat(data_set,labels):
 
@@ -132,7 +129,7 @@ def Tree_creat(data_set,labels):
 
     #对于当前feature的每一个值都递归构造新的子树
     #每一个子树的dataset要经过划分
-<<<<<<< HEAD
+
 
 
     #根据上面的信息对已知的最优feature进行划分
@@ -158,12 +155,3 @@ dataSet = [[1, 1, 'yes'],
 #lensesLabels = ['age','prescript','astigmatic','tearRate']
 lensesLabels = ['first','second']
 lensesTree = Tree_creat(dataSet,lensesLabels)
-
-=======
-    for value in feature_best_valueset
-        sub_labels = labels[:]
-        Tree[feature_best_label][feature_best_value] = Tree_creat
-
-    return Tree
-
->>>>>>> origin/master
