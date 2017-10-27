@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import lab1
+import CART_linear_regression
 from pylab import *
 mpl.rcParams['font.sans-serif'] = ['SimHei'] #否则中文无法正常显示
 
@@ -88,4 +89,5 @@ def createPlot(Tree):
     plotTree(Tree,(0.5,1.0),'')
     plt.show()
 
-createPlot(lab1.lensesTree)
+createPlot(CART_linear_regression.CART_Tree)
+createPlot(CART_linear_regression.PRUNE_CART_Tree)
