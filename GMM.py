@@ -94,9 +94,6 @@ def Para_init(dataset, centers, K): #init Miu Sigma Pie
     return Pie, Miu, Sigma
 
 
-
-
-
 K = 4
 iteration = 50
 meanlist = [[0,5],[3,0],[5,-5],[12,-2]]
@@ -106,7 +103,8 @@ sizelist = [400,400,500,650]
 dataset = cluster_init.datagenerate(meanlist, covlist, sizelist)
 cluster_plot.initial_plot(dataset)
 init_centers = cluster_init.centers_init(dataset, K)
-Pie, Miu, Sigma = Para_init(dataset, init_centers, K)
+random_centers = cluster_init.centers_random(K)
+Pie, Miu, Sigma = Para_init(dataset, random_centers, K)
 post_Pie, post_Miu, post_Sigma = GMM_Process(dataset, Pie, Miu, Sigma, K)
 for i in range(iteration):
     post_Pie, post_Miu, post_Sigma = GMM_Process(dataset, post_Pie, post_Miu, post_Sigma, K)
