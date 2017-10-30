@@ -2,6 +2,7 @@ import numpy as np
 import math
 import copy
 import cluster_init
+import cluster_plot
 
 
 #Pie 1 * K
@@ -12,7 +13,7 @@ import cluster_init
 
 
 def Gauss_cal(Data, Miu, Sigma, D, K, pi): #Sigma is a list of matrix
-    Miu = np.mat(Miu)
+    #Miu = np.mat(Miu)
     Gaussian = np.zeros((len(Data), K))
 
     for i in range(len(Data)):
@@ -45,32 +46,37 @@ def Sigma_update(Sigma, Gama, Data, Miu, N):
         for row in range(N):
             Nk += Gama[row,k]
             comp[row] = Gama[row,k] * (Data[row]-Miu_matrix[row])
-        comp = comp.T
-        Sigma[k] = sum(comp * (Data-Miu_matrix)) / Nk  #calculate the new sigma kth matrix using the formular
+        Sigma[k] = ((Data-Miu_matrix).T * comp) / Nk  #calculate the new sigma kth matrix using the formular
     return Sigma
 
 def Miu_update(Miu, Gama, Data, K, N):
+    post_Miu = Miu[:]
     D = Data.shape[1]
     Nlist = sum(Gama)
     Nlist = Nlist.tolist()
     for k in range(K):
-        comp = np.zeros((N, D))
+        '''comp = np.zeros((N, D))
         for row in range(N):  # N
-            comp[row,:] = Gama[row, k] * Data[row,:]
-        Miu[k] = Nlist[k] * sum(comp)
+            comp[row,:] = Gama[row, k] * Data[row,:]'''
+        Gama_colum = Gama[:,k]
+        Gama_matrix = Gama[:,k]
+        Gama_matrix = np.column_stack((Gama_matrix,Gama_colum))
+        post_Miu[k] = 1/Nlist[k] * sum(np.multiply(Gama_matrix,Data))
+        #post_Miu[k] = 1/Nlist[k] * sum(comp)
         Pie = [Nlist[i]/sum(Nlist) for i in range(K)]
-    return Pie, Miu
+    return Pie, post_Miu
 
-def GMM_Process(Data, Pie, Miu, Sigma, K, iteration):
+
+def GMM_Process(Data, Pie, Miu, Sigma, K):
     N = len(Data)
     pi = math.pi
     D = len(Data[0])
     Data = np.mat(Data)
     Gaussian = Gauss_cal(Data, Miu, Sigma, D, K, pi)
     Gama = Gama_cal(Pie, Gaussian, N, K)
-    Sigma = Sigma_update(Sigma, Gama, Data, Miu, N)
-    Pie, Miu = Miu_update(Miu, Gama, Data, K, N)
-    return Pie, Miu, Sigma
+    post_Sigma = Sigma_update(Sigma, Gama, Data, Miu, N)
+    post_Pie, post_Miu = Miu_update(Miu, Gama, Data, K, N)
+    return post_Pie, post_Miu, post_Sigma
 
 def Para_init(dataset, centers, K): #init Miu Sigma Pie
     D = len(dataset[0])
@@ -92,15 +98,19 @@ def Para_init(dataset, centers, K): #init Miu Sigma Pie
 
 
 K = 4
-iteration = 10
+iteration = 50
 meanlist = [[0,5],[3,0],[5,-5],[12,-2]]
 covlist = [ [[5,1],[1,5]], [[5,3],[3,5]], [[4,-2],[-2,4]], [[5,0],[0,1]] ]
-sizelist = [200,250,200,150]
+sizelist = [400,400,500,650]
 
 dataset = cluster_init.datagenerate(meanlist, covlist, sizelist)
-centers = cluster_init.centers_init(dataset, K)
-Pie, Miu, Sigma = Para_init(dataset, centers, K)
-post_Pie, post_Miu, post_Sigma = GMM_Process(dataset, Pie, Miu, Sigma, K, iteration)
+cluster_plot.initial_plot(dataset)
+init_centers = cluster_init.centers_init(dataset, K)
+Pie, Miu, Sigma = Para_init(dataset, init_centers, K)
+post_Pie, post_Miu, post_Sigma = GMM_Process(dataset, Pie, Miu, Sigma, K)
+for i in range(iteration):
+    post_Pie, post_Miu, post_Sigma = GMM_Process(dataset, post_Pie, post_Miu, post_Sigma, K)
+    cluster_plot.result_plot(dataset, post_Miu, init_centers)
 a = 1
 
 

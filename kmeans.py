@@ -38,8 +38,8 @@ def centers_init(dataset, k):
 
 
 def kmeans(dataset, k, centroids):
-    #centroids = centers_init(dataset, k)
-    #init_centroids = centroids[:]
+    centroids = centers_init(dataset, k)
+    init_centroids = centroids[:]
     distance_value, idx_list = data_class(dataset, centroids)
     class_datalist = [[] for i in centroids]
     for i in range(len(idx_list)):  #this loop is to build the cluster to related centroids
