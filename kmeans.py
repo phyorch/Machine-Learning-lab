@@ -1,18 +1,7 @@
 import numpy as np
-import matplotlib as plot
-import matplotlib.pyplot as plt
+import cluster_init
+import cluster_plot
 
-def datagenerate(meanlist, covlist, sizelist):
-    #xlist = []
-    #ylist = []
-    dataset = []
-    for i in range(len(meanlist)):
-        mean = meanlist[i]
-        cov = covlist[i]
-        size = sizelist[i]
-        data = np.random.multivariate_normal(mean,cov,size)
-        dataset.append(data)
-    return dataset
 
 
 def data_class(dataset, centers):  # dataset and centers here is transfers to numpy array
@@ -38,8 +27,6 @@ def centers_init(dataset, k):
 
 
 def kmeans(dataset, k, centroids):
-    centroids = centers_init(dataset, k)
-    init_centroids = centroids[:]
     distance_value, idx_list = data_class(dataset, centroids)
     class_datalist = [[] for i in centroids]
     for i in range(len(idx_list)):  #this loop is to build the cluster to related centroids
@@ -50,9 +37,23 @@ def kmeans(dataset, k, centroids):
         x_mean = sum(x)/len(x)
         y_mean = sum(y)/len(y)
         centroids[i] = [x_mean,y_mean]
-    return init_centroids, centroids
+    return centroids
 
 
+iteration = 20
+k = 4
+meanlist = [[0,5],[3,0],[5,-5],[8,-2]]
+covlist = [ [[5,1],[1,5]], [[5,3],[3,5]], [[4,-2],[-2,4]], [[2,0],[0,1]] ]
+sizelist = [400,400,500,650]
 
+data = cluster_init.datagenerate(meanlist, covlist, sizelist)
+cluster_plot.initial_plot(data)
+centers = cluster_init.centers_init(data, k)
+init_centroids = centers[:]
+
+
+for i in range(iteration):
+    centers = kmeans(data, k, centers)
+    cluster_plot.kmeans_plot(data, centers, init_centroids)
 
 

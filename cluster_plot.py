@@ -1,4 +1,3 @@
-import kmeans
 import cluster_init
 import matplotlib.pyplot as plt
 
@@ -19,6 +18,17 @@ def result_plot(data, centers, init_centers):
     yshow = [elem[1] for elem in data]
     xcenter = [elem[0,0] for elem in centers]
     ycenter = [elem[0,1] for elem in centers]
+    xinit_center = [elem[0] for elem in init_centers]
+    yinit_center = [elem[1] for elem in init_centers]
+    plt.plot(xshow, yshow, 'ro', xcenter, ycenter, 'bs')#xinit_center, yinit_center, 'g^',
+    plt.axis()
+    plt.show()
+
+def kmeans_plot(data, centers, init_centers):
+    xshow = [elem[0] for elem in data]
+    yshow = [elem[1] for elem in data]
+    xcenter = [elem[0] for elem in centers]
+    ycenter = [elem[1] for elem in centers]
     xinit_center = [elem[0] for elem in init_centers]
     yinit_center = [elem[1] for elem in init_centers]
     plt.plot(xshow, yshow, 'ro', xcenter, ycenter, 'bs')#xinit_center, yinit_center, 'g^',
