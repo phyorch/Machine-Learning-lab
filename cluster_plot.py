@@ -1,7 +1,7 @@
 import cluster_init
 import matplotlib.pyplot as plt
 
-
+# plot the data before we implement the algorithm to get forward look
 def initial_plot(data):
     '''meanlist = [[-5, 5], [3, 3], [5, -5], [12, -2]]
     covlist = [[[5, 1], [1, 5]], [[5, 3], [3, 5]], [[4, -2], [-2, 4]], [[5, 0], [0, 1]]]
@@ -13,6 +13,7 @@ def initial_plot(data):
     plt.axis()
     plt.show()
 
+# plot the final result for GMM
 def result_plot(data, centers, init_centers):
     xshow = [elem[0] for elem in data]
     yshow = [elem[1] for elem in data]
@@ -24,6 +25,7 @@ def result_plot(data, centers, init_centers):
     plt.axis()
     plt.show()
 
+# plot the final result for kmeans
 def kmeans_plot(data, centers, init_centers):
     xshow = [elem[0] for elem in data]
     yshow = [elem[1] for elem in data]

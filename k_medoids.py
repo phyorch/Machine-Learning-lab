@@ -14,8 +14,9 @@ def data_class(dataset, medoids):  # dataset and medoids here is transfers to nu
     idx_list = [elem.index(min(elem)) for elem in center_distance]
     return distance_value, idx_list
 
+# k_medoids implementation
 def k_medoids(dataset, medoids):
-    distance_value, idx_list = data_class(dataset, medoids)
+    distance_value, idx_list = cluster_init.data_class(dataset, medoids)
 
     class_datalist = [[] for i in medoids]
     for i in range(len(idx_list)):  # this loop is to build the cluster to related centroids
@@ -30,9 +31,10 @@ def k_medoids(dataset, medoids):
     return medoids
 
 
+#test
 iteration = 20
 k = 4
-meanlist = [[0,5],[3,0],[5,-5],[8,-2]]
+meanlist = [[-10,5],[3,0],[5,-5],[12,-2]]
 covlist = [ [[5,1],[1,5]], [[5,3],[3,5]], [[4,-2],[-2,4]], [[2,0],[0,1]] ]
 sizelist = [400,400,500,650]
 

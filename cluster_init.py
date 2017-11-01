@@ -1,5 +1,8 @@
 import numpy as np
 
+
+# This function is used to generate ant amount of data
+# as long as you provide the basic requirement in implementation test
 def datagenerate(meanlist, covlist, sizelist):
     #xlist = []
     #ylist = []
@@ -12,6 +15,7 @@ def datagenerate(meanlist, covlist, sizelist):
         dataset.extend(data)
     return dataset
 
+# This function is frequently used in these algorithm to classify the data to different clusters
 def data_class(dataset, centers):  # dataset and centers here is transfers to numpy array
     dataset = np.array(dataset)
     centers = np.array(centers)
@@ -33,20 +37,10 @@ def centers_init(dataset, k):
         next_idx = distance_value.index(max(distance_value))
         centers.append(dataset[next_idx])
     return centers
-
+# Using random method to generate k centers
 def centers_random(k):
     centers = np.random.rand(4,2)
     centers[:,0] = 5 * centers[:,0]
     centers[:, 1] = 8* centers[:,1]
     return centers
 
-K = 4
-iteration = 10
-meanlist = [[0,5],[3,0],[5,-5],[12,-2]]
-covlist = [ [[5,1],[1,5]], [[5,3],[3,5]], [[4,-2],[-2,4]], [[5,0],[0,1]] ]
-sizelist = [200,250,200,150]
-
-dataset = datagenerate(meanlist, covlist, sizelist)
-init_centers = centers_init(dataset, K)
-a = centers_random(K)
-b = 1

@@ -3,8 +3,8 @@ import cluster_init
 import cluster_plot
 
 
-
-def data_class(dataset, centers):  # dataset and centers here is transfers to numpy array
+# dataset and centers here is transfers to numpy array
+def data_class(dataset, centers):
     dataset = np.array(dataset)
     centers = np.array(centers)
     center_distance = [[np.linalg.norm(data - elem) for elem in centers] for data in dataset]
@@ -12,7 +12,7 @@ def data_class(dataset, centers):  # dataset and centers here is transfers to nu
     idx_list = [elem.index(min(elem)) for elem in center_distance]
     return distance_value, idx_list
 
-
+# get the initial centers using greedy method
 def centers_init(dataset, k):
     data = []
     centers = []
@@ -22,10 +22,9 @@ def centers_init(dataset, k):
         distance_value, idx_list = data_class(dataset, centers)
         next_idx = distance_value.index(max(distance_value))
         centers.append(dataset[next_idx])
-
     return centers
 
-
+# kmeans implementation
 def kmeans(dataset, k, centroids):
     distance_value, idx_list = data_class(dataset, centroids)
     class_datalist = [[] for i in centroids]
@@ -40,6 +39,7 @@ def kmeans(dataset, k, centroids):
     return centroids
 
 
+#test
 iteration = 20
 k = 4
 meanlist = [[0,5],[3,0],[5,-5],[8,-2]]

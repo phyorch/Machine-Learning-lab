@@ -4,14 +4,14 @@ import copy
 import cluster_init
 import cluster_plot
 
+#main parameters
+#Pie 1 * K          is the probability for randimly choosing a model form K Gaussian models
+#Data N * D         is our dataset
+#Miu K * D          is the mean value matrix of our K Gaussian model
+#Sigma K * D * D    is the conviriance matrix of our K Gaussian model
+#Gama N * K         is the probability matrix for the probability that a data comes from k component of K models
 
-#Pie 1 * K
-#Data N * D
-#Miu K * D
-#Sigma K * D * D
-#Gama N * K
-
-
+# clculate the probability for every point in every Gaussian cluster
 def Gauss_cal(Data, Miu, Sigma, D, K, pi): #Sigma is a list of matrix
     #Miu = np.mat(Miu)
     Gaussian = np.zeros((len(Data), K))
@@ -22,7 +22,7 @@ def Gauss_cal(Data, Miu, Sigma, D, K, pi): #Sigma is a list of matrix
             Gaussian[i][k] = C * math.exp(-1/2 * ((Data[i]- Miu[k]) * Sigma[k].I * (Data[i]-Miu[k]).T))
     return Gaussian #the output Gaussian is matrix format
 
-
+# update Gama for a new loop
 def Gama_cal(Pie, Gaussian, N, K):
     Pie = np.mat(Pie)
     Gama = np.zeros((N, K))
@@ -33,7 +33,7 @@ def Gama_cal(Pie, Gaussian, N, K):
             Gama[i][k] = (Pie[0,k]*Gaussian[i][k]) / (Pie*elem)  # for one dimension matrix, the transpose is invlid operation by .T
     return Gama
 
-
+# update Sigma for a new loop
 def Sigma_update(Sigma, Gama, Data, Miu, N):
     D = Data.shape[1]
     for k in range(len(Sigma)):  #K
@@ -49,6 +49,7 @@ def Sigma_update(Sigma, Gama, Data, Miu, N):
         Sigma[k] = ((Data-Miu_matrix).T * comp) / Nk  #calculate the new sigma kth matrix using the formular
     return Sigma
 
+# update Miu for a new loop
 def Miu_update(Miu, Gama, Data, K, N):
     post_Miu = Miu[:]
     D = Data.shape[1]
@@ -66,7 +67,7 @@ def Miu_update(Miu, Gama, Data, K, N):
         Pie = [Nlist[i]/sum(Nlist) for i in range(K)]
     return Pie, post_Miu
 
-
+# GMM implementation
 def GMM_Process(Data, Pie, Miu, Sigma, K):
     N = len(Data)
     pi = math.pi
@@ -78,6 +79,7 @@ def GMM_Process(Data, Pie, Miu, Sigma, K):
     post_Pie, post_Miu = Miu_update(Miu, Gama, Data, K, N)
     return post_Pie, post_Miu, post_Sigma
 
+# initialize all the parameters for GMM Gaussian model
 def Para_init(dataset, centers, K): #init Miu Sigma Pie
     D = len(dataset[0])
     Miu = np.mat(centers) # Using initial centers
@@ -93,7 +95,7 @@ def Para_init(dataset, centers, K): #init Miu Sigma Pie
         Sigma[k] = np.mat(np.cov(data.T))
     return Pie, Miu, Sigma
 
-
+#test
 K = 4
 iteration = 50
 meanlist = [[0,5],[3,0],[5,-5],[12,-2]]
