@@ -2,7 +2,8 @@ import cluster_init
 import cluster_plot
 import numpy as np
 
-# here we use exhausted algorithm    PAM (Patitioning Around Medoids)is another
+# here we use exhausted algorithm
+# here if we use PAM (Patitioning Around Medoids) will get a faster solution but it can not always find the optimal solution
 # Manhattan distance is used
 
 def data_class(dataset, medoids):  # dataset and medoids here is transfers to numpy array
@@ -23,8 +24,9 @@ def k_medoids(dataset, medoids):
     for i in range(len(class_datalist)):
         cluster_x = class_datalist[i]
         cluster_y = cluster_x[:]
-        cost_list = sum([abs(elem1 - elem2) for elem2 in cluster_y for elem1 in cluster_x])
-        medoids[i] = class_datalist[cost_list.index(min(cost_list))] # find one point in the cluseter has a totall minimun distance
+        cost_matrix = [[sum(abs(elem1 - elem2)) for elem2 in cluster_y] for elem1 in cluster_x]
+        cost_list = [sum(elem) for elem in cost_matrix]
+        medoids[i] = class_datalist[i][cost_list.index(min(cost_list))] # find one point in the cluseter has a totall minimun distance
     return medoids
 
 
