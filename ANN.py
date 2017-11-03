@@ -8,7 +8,7 @@ import scipy as sp
 #node_matrix   list[array]  containing every layer node value  first element in is input last is output
 #Theta         list[arrat]  containing every layer theta parameters as a 2D array
 #dataset_x
-#dataset_y  2D array
+#dataset_y     2D array
 
 
 
@@ -37,8 +37,31 @@ def data_read():
 
 
 def activation(x):
-    sigmoid = 1/(1 + math.exp(-x))
-    return sigmoid
+    for elem in x:
+        elem = 1/(1 + math.exp(-elem))
+    return x
+
+class Layer(object):
+    def __init__(self, layer_order, layer_size):
+        self.size = layer_size
+        self.order = layer_order
+    def Theta_init(self, next_layer_size):
+        epsilon = 0.5
+        self.theta = np.random.rand(next_layer_size, self.size)
+        self.theta = self.theta * 2 * epsilon - epsilon
+        self.bias = np.random.rand(next_layer_size, 1)
+    def Node_init(self):
+        self.node = np.random.rand(self.size, 1)
+    def Error_init(self):
+        self.error = np.random.rand(self.size, 1)
+
+
+class Error(object):
+    def __init__(self, layer_order, layer_size):
+        self.size = layer_size
+        self.order = layer_order
+    def Error_init(self):
+        self.error = np.zeros((self.size, 1))
 
 # contains the unit amount of each hidden layer
 # first eloement is input and last is output
@@ -59,67 +82,97 @@ def deritive_zero(Theta):
         deritive.append(der)
     return deritive
 
-
-def FP_process(Theta, input):  # input is array
-    node_matrix = []
-    for layer in Theta:
-        if len(node_matrix)==0: # if we are calculating the input layer to seconde layer
+def FP_process(Network, input):  # input is array
+    for l in range(len(Network)):
+        layer = Network[l]
+        if layer.order==0: # if we are calculating the input layer to seconde layer
             #node_matrix.append(input)
-            input = input.append(1)
-            node_layer = [activation(np.dot(row, input)) for row in layer]
-            node_matrix.append(node_layer)
-        else: #  we use previous node list to calculate the new one
-            prior = node_matrix[-1]
-            prior.append(1)
-            node_layer = [activation(np.dot(row, prior)) for row in layer]
-            node_matrix.append(node_layer)
-    node_matrix2 = node_matrix[:]  # node_matrix2 is used for gradient claculating
-    node_matrix2.insert(0, input)
-    del node_matrix2[-1]
-    return node_matrix, node_matrix2
+            layer.node = input
+        else: #  we use previous node array to calculate the new one
+            prior = Network[l-1]
+            prior_node = prior.node
+            a = prior.theta.shape
+            a1 = prior_node.shape
+            b = np.dot(prior.theta, prior_node)
+            b1 = b.shape
+            c = prior.bias
+            d = prior.bias.shape
+            e = (b+c).shape
+            layer.node = activation(b + c)
+    return Network
 
 
-def BP_process(node_matrix, y, Theta): # output is one of the dataset's y vector
-    err_matrix = []
-    node_matrix = node_matrix[::-1] # first element means output   forward recursion
-    node_matrix = node_matrix[::-1]
-    for layer in range(len(Theta)):
-        if len(err_matrix)==0:
-            error = node_matrix[0] - y
-            err_matrix.append(error)
+def BP_process(Network, y): # output is one of the dataset's y vector
+    for l in range(len(Network)):
+        ll = len(Network) - l
+        if ll==len(Network)-1:
+            Network[ll].error = Network[ll].node - y
         else:
-            post = err_matrix[0]  # error of post layer
-            theta = Theta[layer]
-            theta = theta[:len(theta)-1] # the last row is bias so we delete it
-            node = node_matrix[layer]
-            error = np.multiply(np.multiply(theta.T * post, node), np.ones(node.shape)-node) # back propagation
-            err_matrix.insert(0,error)
-    return err_matrix
+            layer = Network[ll]
+            post_layer = Network[ll+1]
+            layer.error = np.multiply(np.multiply(np.dot(layer.theta.T, post_layer.error), layer.node),
+                                      np.ones(layer.node.shape)-layer.node) # back propagation
+    return Network
 
 
-def cost_cal(y, pridiction):
-    cost = 0
-    for k in range(len(y)):
-        cost += y[k]*np.log(pridiction[k]) + (1-y[k])*np.log(1-np.log(pridiction[k]))
+def cost_cal(y, Network):
+
+    cost = y*np.log(Network[-1].node) + (1-y)*np.log(1-np.log(Network[-1].node))
+
     return cost
 
-def J_cal(X, Y, Theta):
 
 
-def training(X, Y, deritive, ,lamida, layer_size=3):
+def Network_inital(X, Y, size, layer_num=3):
     M = len(Y)
-    Theta = Theta_init(layer_size)
-    deritive = deritive_zero(Theta)
+    Network = []
+    Error_total = []
+    for i in range(layer_num):
+        layer = Layer(i, size[i])
+        layer.Node_init()
+        layer.Error_init()
+        if i<layer_num-1:
+            layer.Theta_init(size[i+1])
+        Network.append(layer)
+
+        error = Error(i, size[i])
+        error.Error_init()
+        Error_total.append(error)
+    return Network, Error_total
+
+def Training(Network,Error_total, X, Y, iteration=20, learning_rate=0.2):
+    M = len(Y)
+    J = 0
     for m in range(M):
-        x = X(m)
-        y = Y(m)
-        node_matrix, node_matrix2 = FP_process(Theta, x)
-        err_matrix = BP_process(node_matrix, y, Theta)
-        for layer in range(len(deritive)):
-            for j in range(len(node_matrix2[layer])):
-                for i in range(len(err_matrix[layer])):
-                    deritive[layer][i][j] += 1/m * (node_matrix2[layer][j] +err_matrix[layer][i]) + lamida/m * Theta[layer][i][j]
-                    # this is the partial deritives of J
+        x = X[m]
+        y = Y[m]
+        Network = FP_process(Network, x)
+        Network = BP_process(Network, y)
+        Error_total.error += 1/m * Network.error
+        #J += -1/m * cost_cal(y, Network)
+    for i in range(iteration):
+        for l in Network:
+            ll = l + 1
+            Network[l].theta -= learning_rate * np.dot(Network[ll].error, Network[l].node.T)
+            Network[l].bias -= learning_rate * Network[ll].error
+    return Network
+
+
+X, Y = data_read()
+X = X[:100,:]
+Y = Y[:100,:]
+sizelist = [784, 20, 10]
+Network, Error_total = Network_inital(X, Y, sizelist)
+q = Network[0].bias
+w = Network[0].bias.shape
+e = Network[0].node
+r = Network[0].node.shape
+t = Network[0].order
+y = Network[1].node
+u = Network[1].node.shape
+Network = Training(Network, Error_total, X, Y)
+
+
 
 
 
