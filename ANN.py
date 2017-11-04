@@ -11,13 +11,11 @@ import scipy as sp
 #dataset_y     2D array
 
 
-
-
 # Each of the image contains 28*28=784 pixels
 # labels is the y value list of each output so it should be turned to a matrix or 2-D array
-def data_read():
+def data_read(adress):
     data_train = csv.reader(
-        open('C:/Users/Phyorch/Desktop/Learning/Mchine learning/project and homework/lab3/train.csv'))
+        open(adress))
     dataset_x = []
     labels = []
 
@@ -33,14 +31,13 @@ def data_read():
     for i in range(len(dataset_y)):
         pos = labels[i]
         dataset_y[i,pos] = 1
-    return dataset_x, dataset_y
+    return dataset_x, dataset_y, labels
 
 
-def activation(x):
-    for elem in x:
-        elem = 1/(1 + math.exp(-elem))
-    return x
 
+# contains the unit amount of each hidden layer
+# first eloement is input and last is output
+# Theta contains the randomly initialized theta matrix from current layer to next
 class Layer(object):
     def __init__(self, layer_order, layer_size):
         self.size = layer_size
@@ -49,38 +46,16 @@ class Layer(object):
         epsilon = 0.5
         self.theta = np.random.rand(next_layer_size, self.size)
         self.theta = self.theta * 2 * epsilon - epsilon
-        self.bias = np.random.rand(next_layer_size, 1)
+        self.bias = np.random.rand(1, next_layer_size)
     def Node_init(self):
-        self.node = np.random.rand(self.size, 1)
+        self.node = np.random.rand(1, self.size)
     def Error_init(self):
-        self.error = np.random.rand(self.size, 1)
+        self.error = np.random.rand(1, self.size)
 
 
-class Error(object):
-    def __init__(self, layer_order, layer_size):
-        self.size = layer_size
-        self.order = layer_order
-    def Error_init(self):
-        self.error = np.zeros((self.size, 1))
-
-# contains the unit amount of each hidden layer
-# first eloement is input and last is output
-# Theta contains the randomly initialized theta matrix from current layer to next
-def Theta_init(layer_size):
-    epsilon = 0.04
-    Theta = []
-    for i in range(len(layer_size)-1):
-        theta = np.random.rand(layer_size[i+1], layer_size[i]+1)
-        theta = theta * 2 * epsilon - epsilon
-        Theta.append(theta)
-    return Theta
-
-def deritive_zero(Theta):
-    deritive = []
-    for elem in Theta:
-        der = np.zeros(elem.shape)
-        deritive.append(der)
-    return deritive
+def activation(x):
+    x = 1/(1 + np.exp(-x))
+    return x
 
 def FP_process(Network, input):  # input is array
     for l in range(len(Network)):
@@ -91,36 +66,27 @@ def FP_process(Network, input):  # input is array
         else: #  we use previous node array to calculate the new one
             prior = Network[l-1]
             prior_node = prior.node
-            a = prior.theta.shape
-            a1 = prior_node.shape
-            b = np.dot(prior.theta, prior_node)
-            b1 = b.shape
+            prior_theta = prior.theta
+            b = np.dot(prior.theta, prior_node.T)
             c = prior.bias
-            d = prior.bias.shape
-            e = (b+c).shape
-            layer.node = activation(b + c)
+            layer.node = activation(b.T + c)
     return Network
+
 
 
 def BP_process(Network, y): # output is one of the dataset's y vector
-    for l in range(len(Network)):
-        ll = len(Network) - l
-        if ll==len(Network)-1:
-            Network[ll].error = Network[ll].node - y
+    for l in range(len(Network)-1,-1,-1):
+        if l==len(Network)-1:
+            n = Network[l].node
+            Network[l].error = Network[l].node - y
+            q = Network[l].error
         else:
-            layer = Network[ll]
-            post_layer = Network[ll+1]
-            layer.error = np.multiply(np.multiply(np.dot(layer.theta.T, post_layer.error), layer.node),
-                                      np.ones(layer.node.shape)-layer.node) # back propagation
+            layer = Network[l]
+            post_layer = Network[l+1]
+            e = post_layer.error
+            d = np.dot(layer.theta.T, post_layer.error.T)
+            layer.error = np.dot(layer.theta.T, post_layer.error.T).T * layer.node * (1-layer.node) # back propagation
     return Network
-
-
-def cost_cal(y, Network):
-
-    cost = y*np.log(Network[-1].node) + (1-y)*np.log(1-np.log(Network[-1].node))
-
-    return cost
-
 
 
 def Network_inital(X, Y, size, layer_num=3):
@@ -134,53 +100,47 @@ def Network_inital(X, Y, size, layer_num=3):
         if i<layer_num-1:
             layer.Theta_init(size[i+1])
         Network.append(layer)
+    return Network
 
-        error = Error(i, size[i])
-        error.Error_init()
-        Error_total.append(error)
-    return Network, Error_total
 
-def Training(Network,Error_total, X, Y, iteration=20, learning_rate=0.2):
+def Training(Network, X, Y, learning_rate=0.2):
     M = len(Y)
-    J = 0
     for m in range(M):
         x = X[m]
         y = Y[m]
         Network = FP_process(Network, x)
         Network = BP_process(Network, y)
-        Error_total.error += 1/m * Network.error
-        #J += -1/m * cost_cal(y, Network)
-    for i in range(iteration):
-        for l in Network:
+        for l in range(len(Network)-1):
             ll = l + 1
-            Network[l].theta -= learning_rate * np.dot(Network[ll].error, Network[l].node.T)
+            Network[l].node.shape = (1,Network[l].size)
+            Network[l].theta -= learning_rate * np.dot(Network[ll].error.T, Network[l].node)
             Network[l].bias -= learning_rate * Network[ll].error
     return Network
 
-
-X, Y = data_read()
-X = X[:100,:]
-Y = Y[:100,:]
-sizelist = [784, 20, 10]
-Network, Error_total = Network_inital(X, Y, sizelist)
-q = Network[0].bias
-w = Network[0].bias.shape
-e = Network[0].node
-r = Network[0].node.shape
-t = Network[0].order
-y = Network[1].node
-u = Network[1].node.shape
-Network = Training(Network, Error_total, X, Y)
+def Test(Network, X, Y):
+    values = []
+    for i in range(X.shape[0]):
+        Network = FP_process(Network, X[i])
+        result = Network[-1].node
+        values.append(result)
+        #for elem in range(len(result)):
+        #    if result[elem]==1:
+        #        values.append(elem)
+        #        break
+    return values
 
 
-
-
-
-
-
-
-
-
-
-
-
+data_X, data_Y, a = data_read('C:/Users/Phyorch/Desktop/Learning/Mchine learning/project and homework/lab3/train.csv')
+test_X, test_Y, labels = data_read('C:/Users/Phyorch/Desktop/Learning/Mchine learning/project and homework/lab3/test.csv')
+X = data_X[:39000,:]
+Y = data_Y[:39000,:]
+X = X/255
+Y = Y/255
+sizelist = [784, 30, 10]
+Network = Network_inital(X, Y, sizelist)
+Network = Training(Network, X, Y)
+test_X = data_X[39999:41000,:]
+test_Y = data_Y[39999:41000,:]
+values = np.array(Test(Network, test_X, test_Y))
+answer = labels[39999:41000]
+b = 1
