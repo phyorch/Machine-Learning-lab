@@ -78,7 +78,7 @@ def BP_process(Network, y): # output is one of the dataset's y vector
     for l in range(len(Network)-1,-1,-1):
         if l==len(Network)-1:
             n = Network[l].node
-            Network[l].error = Network[l].node - y
+            Network[l].error = (Network[l].node - y).T * Network[l].node * (1-Network[l].node)
             q = Network[l].error
         else:
             layer = Network[l]
@@ -141,6 +141,11 @@ Network = Network_inital(X, Y, sizelist)
 Network = Training(Network, X, Y)
 test_X = data_X[39999:41000,:]
 test_Y = data_Y[39999:41000,:]
+answer = []
+for i in range(len(test_X)):
+    network = FP_process(Network, test_X[i])
+    answer.append(network[-1].node)
+answer = np.array(answer)
 values = np.array(Test(Network, test_X, test_Y))
 answer = labels[39999:41000]
 b = 1
