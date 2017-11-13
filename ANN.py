@@ -122,13 +122,12 @@ labels = data[:, 0]
 labels_network = code(labels)
 data = data[:, 1:]
 X = data[:39000, :]/255
-Y = labels_network[:39000, :]/255
+Y = labels_network[:39000, :]
 sizelist = [784, 30, 10]
-test_X = data[:39000, :]/255
-test_Y = labels[:39000] /255
+test_X = data[39000:42000, :]/255
+test_Y = labels[39000:42000]
 
 Network = Network_initail(sizelist)
 Network = Training(Network, X, Y)
 right, accuracy, predict = Test(Network, test_X, test_Y)
-a = Network[2].node
-
+a = 2
