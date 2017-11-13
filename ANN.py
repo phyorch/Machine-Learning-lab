@@ -130,4 +130,3 @@ test_Y = labels[39000:42000]
 Network = Network_initail(sizelist)
 Network = Training(Network, X, Y)
 right, accuracy, predict = Test(Network, test_X, test_Y)
-a = 2
