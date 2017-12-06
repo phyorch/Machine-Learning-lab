@@ -25,8 +25,9 @@ def train(dataset):
         train_likelihood[word] = float(train_likelihood[word])/len(dataset)
     return train_likelihood
 
-def test(dataset, spam_likelihood):
-    post = 1
+def test(dataset, spam_likelihood, ham_likelihood):
+    post_spam = 1
+    post_ham = 1
     error = 0
     result = np.zeros((len(dataset),2))
     for i in range(len(dataset)):
@@ -34,11 +35,13 @@ def test(dataset, spam_likelihood):
         wordset, label = getword_mail(email)
         for word in wordset:
            if word in spam_likelihood:
-               post *= spam_likelihood[word]
-           else: post *= 0.8
-        if post>0.5:
+               post_spam *= spam_likelihood[word]
+           if word in ham_likelihood:
+               post_ham *= ham_likelihood[word]
+           #else: post_spam *= 0.8
+        if post_spam>post_ham:
             cla = 1
-        if post<0.5:
+        if post_spam<post_ham:
             cla = 0
         if cla!=label:
             error += 1
@@ -58,7 +61,7 @@ ham_dataset = dataset[2000:5000]
 test_dataset = dataset[1000:2000]
 spam_likelihood = train(spam_dataset)
 ham_likelihood = train(ham_dataset)
-result, error = test(test_dataset, spam_likelihood)
+result, error = test(test_dataset, spam_likelihood, ham_likelihood)
 a = 1
 
 # using list but not set, we can retain the frequence information
