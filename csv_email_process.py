@@ -38,7 +38,9 @@ def test(dataset, spam_likelihood, ham_likelihood):
                post_spam *= spam_likelihood[word]
            if word in ham_likelihood:
                post_ham *= ham_likelihood[word]
-           #else: post_spam *= 0.8
+           else:
+               post_spam *= 0.0005
+               post_ham *=0.0005
         if post_spam>post_ham:
             cla = 1
         if post_spam<post_ham:
@@ -57,8 +59,8 @@ data = pd.read_csv(doc_path)
 data.as_matrix
 dataset = np.array(data)
 spam_dataset = dataset[0:1000]
-ham_dataset = dataset[2000:5000]
-test_dataset = dataset[1000:2000]
+ham_dataset = dataset[2000:3000]
+test_dataset = dataset[1000:1739]
 spam_likelihood = train(spam_dataset)
 ham_likelihood = train(ham_dataset)
 result, error = test(test_dataset, spam_likelihood, ham_likelihood)
