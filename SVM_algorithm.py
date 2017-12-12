@@ -17,7 +17,7 @@ def alpha_clip(alpha, H, L):
 
 # consider 2 class at first
 
-def SMO(X, Y, K, C, threshould=0.0001, iteration=50):
+def SMO(X, Y, K, C, threshould=0.001, iteration=50):
     m = X.shape[0]
     n = X.shape[1]
     # initialize the parameters
@@ -27,7 +27,7 @@ def SMO(X, Y, K, C, threshould=0.0001, iteration=50):
     while itr < iteration:
         changed_num = 0
         for i in range(m):
-            k = K[i, :]
+            k = K[:, i]
             k.shape = (k.shape[0],1)
             predi = np.dot(k.T, Y * alpha)[0] + b
             Ei = predi - Y[i]
@@ -35,7 +35,7 @@ def SMO(X, Y, K, C, threshould=0.0001, iteration=50):
                     ((Y[i] * Ei > threshould) and \
                              (alpha[i] > 0)):
                 j = int(random_pair(i, m))
-                k = K[j, :]
+                k = K[:, j]
                 k.shape = (k.shape[0], 1)
                 predj = np.dot(k.T, Y * alpha)[0] + b
                 Ej = predj - Y[j]
@@ -44,7 +44,7 @@ def SMO(X, Y, K, C, threshould=0.0001, iteration=50):
                     H = min(C, C + alpha[j] - alpha[i])
                 else:
                     L = max(0, alpha[j] + alpha[i] - C)
-                    H = min(C, alpha[j] - alpha[i])
+                    H = min(C, alpha[j] + alpha[i])
                 if L == H:
                     print('L=H')
                     continue
@@ -106,20 +106,22 @@ def GaussianKernel(X, sigma=2):
         for col in range(size):
             K[row, col] = -0.5 * (np.linalg.norm(X[row,:]-X[col,:]))**2 / (sigma**2)'''
     K = dist.cdist(X, X)
-    K = np.exp(-K ** 2 / 2 / (2 * sigma ** 2))
+    K = np.exp(-K ** 2  / (2 * sigma ** 2))
     return K
 
-def predict(X, Y, x_pred, w, b, alpha, kernel='Gaussian'):
+def predict(X, Y, x_pred, w, b, alpha, kernel):
     if kernel=='Gaussian':
-        sigma = 1
+        sigma = 0.1
         K = dist.cdist(x_pred, X)
-        K = np.exp(-K**2/2 / (2*sigma**2))
+        K = np.exp(-K**2 / (2*sigma**2))
     if kernel=='linear':
         K = np.dot(x_pred, X.T)
     if kernel=='polynomial':
         d = 2
         K = (np.dot(x_pred, X.T))**d
-    pred = np.sum(Y * alpha * K.T) + b
+    K = Y.T * K
+    K = alpha.T * K
+    pred = np.sum(K, axis=1) + b
     pos = np.argwhere(pred >= 0)[:, 0]
     pred[pos] = 1
     np.argwhere(pred < 0)[:, 0]
