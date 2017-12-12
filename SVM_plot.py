@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import SMO_algorithm
+import SVM_algorithm
 def init_plot(X, Y):
     pos1 = np.argwhere(Y==1)
-    pos2 = np.argwhere(Y==0)
+    pos2 = np.argwhere(Y==-1)
     data1 = X[pos1[:,0]]
     data2 = X[pos2[:,0]]
     plt.plot(data1[:,0], data1[:,1], 'ro', data2[:, 0], data2[:, 1], 'bs')
@@ -33,7 +33,7 @@ def result_plot(w, b, alpha, X, Y, kernel, linesize=0.1):
         for i in range(X_grid.shape[1]):
             this_X = np.vstack((X_grid[:, i], Y_grid[:, i]))
             this_X = this_X.T
-            vals[:, i] = SMO_algorithm.predict(X, Y, this_X, w, b, alpha, kernel='Gaussian')
+            vals[:, i] = SVM_algorithm.predict(X, Y, this_X, w, b, alpha, kernel='Gaussian')
         plt.contour(X, Y, vals)
     plt.xticks(())
     plt.yticks(())

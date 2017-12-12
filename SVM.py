@@ -1,27 +1,27 @@
 import numpy as np
 import scipy.io as sio
 import matplotlib as plt
-import SMO_algorithm
+import SVM_algorithm
 import SVM_plot
 
 
 def SVM_demo(kernel):
     data = sio.loadmat('C:/Users/Phyorch/Desktop/Learning/Python repository/hello-world/data/ex6data2.mat')
     X = data['X']
-    Y = data['y']
-    Y[np.argwhere(Y==0)] = -257
+    Y = np.int8(data['y'])
+    Y[np.argwhere(Y==0)] = -1
     SVM_plot.init_plot(X, Y)
 
     if kernel=='linear':
         C = 1
-        K = SMO_algorithm.linearKernel(X)
+        K = SVM_algorithm.linearKernel(X)
     elif kernel=='polynomial':
         C = 1
-        K = SMO_algorithm.polynomialKernel(X)
+        K = SVM_algorithm.polynomialKernel(X)
     elif kernel=='Gaussian':
-        K = SMO_algorithm.GaussianKernel(X)
+        K = SVM_algorithm.GaussianKernel(X)
         C = 1
-    w, b, alpha = SMO_algorithm.SMO(X, Y, K, C)
+    w, b, alpha = SVM_algorithm.SMO(X, Y, K, C)
     SVM_plot.result_plot(w, b, alpha, X, Y, kernel, linesize=0.1)
 
 SVM_demo('Gaussian')

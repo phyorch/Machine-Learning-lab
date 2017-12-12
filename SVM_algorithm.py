@@ -49,7 +49,7 @@ def SMO(X, Y, K, C, threshould=0.0001, iteration=50):
                     print('L=H')
                     continue
 
-                eta =  2 * K[i,j] - K[i,i] + K[j,j]
+                eta =  2 * K[i,j] - K[i,i] - K[j,j]
                 if eta >= 0:
                     print('eta >=0')
                     continue
@@ -100,11 +100,13 @@ def polynomialKernel(X):
     return K
 
 def GaussianKernel(X, sigma=2):
-    size = X.shape[0]
+    '''size = X.shape[0]
     K = np.zeros((size, size))
     for row in range(size):
         for col in range(size):
-            K[row, col] = -0.5 * (np.linalg.norm(X[row,:]-X[col,:]))**2 / (sigma**2)
+            K[row, col] = -0.5 * (np.linalg.norm(X[row,:]-X[col,:]))**2 / (sigma**2)'''
+    K = dist.cdist(X, X)
+    K = np.exp(-K ** 2 / 2 / (2 * sigma ** 2))
     return K
 
 def predict(X, Y, x_pred, w, b, alpha, kernel='Gaussian'):
