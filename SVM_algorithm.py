@@ -1,13 +1,14 @@
 import numpy as np
 import scipy.spatial.distance as dist
 
+# for SMO to get a random index
 def random_pair(i, m):
     j = i
     while j == i:
         j = np.random.uniform(0, m)
     return j
 
-
+# for SMO to limit the value of alpha with a bound
 def alpha_clip(alpha, H, L):
     if alpha >= H:
         alpha = H
@@ -15,8 +16,8 @@ def alpha_clip(alpha, H, L):
         alpha = L
     return alpha
 
-# consider 2 class at first
 
+# the implentation of SMO
 def SMO(X, Y, K, C, threshould=0.001, iteration=50):
     m = X.shape[0]
     n = X.shape[1]
@@ -86,6 +87,7 @@ def SMO(X, Y, K, C, threshould=0.001, iteration=50):
     w = np.dot(Y.T * alpha.T, X)
     return w, b, alpha
 
+# 3 types of kernel
 def linearKernel(X):
     size = X.shape[0]
     K = np.zeros((size, size))
@@ -109,11 +111,16 @@ def GaussianKernel(X, sigma=2):
     K = np.exp(-K ** 2  / (2 * sigma ** 2))
     return K
 
-def predict(X, Y, x_pred, w, b, alpha, kernel):
+
+# predict the grid value to find a contour used to show the boundary of the 2 class
+def predict(X, Y, x_pred, w, b, alpha, kernel, order):
     if kernel=='Gaussian':
-        sigma = 0.1
+        if order==2:
+            sigma = 0.03
+        if order == 3:
+            sigma = 0.25
         K = dist.cdist(x_pred, X)
-        K = np.exp(-K**2 / (2*sigma**2))
+        K = np.exp(-K ** 2 / (2 * sigma ** 2))
     if kernel=='linear':
         K = np.dot(x_pred, X.T)
     if kernel=='polynomial':
@@ -124,8 +131,10 @@ def predict(X, Y, x_pred, w, b, alpha, kernel):
     pred = np.sum(K, axis=1) + b
     pos = np.argwhere(pred >= 0)[:, 0]
     pred[pos] = 1
-    np.argwhere(pred < 0)[:, 0]
+    pos = np.argwhere(pred < 0)[:, 0]
     pred[pos] = -1
     return pred
+
+
 
 

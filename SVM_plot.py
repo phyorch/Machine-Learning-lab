@@ -10,7 +10,7 @@ def init_plot(X, Y):
     plt.axis()
     plt.show()
 
-def result_plot(w, b, alpha, X, Y, kernel, linesize=0.3):
+def result_plot(w, b, alpha, X, Y, kernel, order, linesize=0.3):
     pos1 = np.argwhere(Y == 1)
     pos2 = np.argwhere(Y == -1)
     data1 = X[pos1[:, 0]]
@@ -26,14 +26,14 @@ def result_plot(w, b, alpha, X, Y, kernel, linesize=0.3):
         plt.axis()
         plt.show()
     else:
-        x1 = np.linspace(low0, up0, 100)
-        x2 = np.linspace(low1, up1, 100)
+        x1 = np.linspace(low0, up0, 300)
+        x2 = np.linspace(low1, up1, 300)
         X_grid, Y_grid = np.meshgrid(x1, x2)
         vals = np.zeros_like(X_grid)
         for i in range(X_grid.shape[1]):
             this_X = np.vstack((X_grid[:, i], Y_grid[:, i]))
             this_X = this_X.T
-            vals[:, i] = SVM_algorithm.predict(X, Y, this_X, w, b, alpha, kernel)
+            vals[:, i] = SVM_algorithm.predict(X, Y, this_X, w, b, alpha, kernel, order)
         plt.contour(X_grid, Y_grid, vals)
         plt.plot(data1[:, 0], data1[:, 1], 'ro')
         plt.plot(data2[:, 0], data2[:, 1], 'bs')
